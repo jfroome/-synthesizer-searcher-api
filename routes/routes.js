@@ -7,9 +7,17 @@ module.exports = router;
 //Post Method
 router.post('/post', async (req, res) => {
     const data = new Model({
-        name: req.body.name,
-        age: req.body.age
-    })
+        uid: req.body.uid,
+        title: req.body.title,
+        description: req.body.description,
+        price: req.body.price, 
+        shipping: req.body.shipping,
+        currency: req.body.currency,
+        site: req.body.site,
+        url: req.body.url,
+        //posted: req.body.title,
+        tags: req.body.tags
+    });
 
     try {
         const dataToSave = await data.save();

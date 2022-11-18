@@ -1,17 +1,31 @@
 const mongoose = require('mongoose')
 
-const dataSchema = new mongoose.Schema({
+const listingSchema = new mongoose.Schema({
+  uid: {
+    type: String,
+    required: true
+  },
   title: {
     required: true,
     type: String
   },
+  description: {
+    type: String
+  },
   price: {
-    required: true,
+    type: Number
+  },
+  shipping: {
     type: Number
   },
   currency: {
     required: true,
     type: String
+  },
+  //https://stackoverflow.com/questions/39948196/saving-coordinates-into-mongoose
+  location: {
+    type: [Number],
+    default: [0, 0]
   },
   site: {
     required: true,
@@ -22,7 +36,6 @@ const dataSchema = new mongoose.Schema({
     type: String
   },
   date_posted: {
-    required: true,
     type: Date
   },
   date_recorded: {
@@ -36,4 +49,4 @@ const dataSchema = new mongoose.Schema({
   tags: { type: [String], index: true }
 })
 
-module.exports = mongoose.model('Listing', dataSchema)
+module.exports = mongoose.model('Listing', listingSchema)
