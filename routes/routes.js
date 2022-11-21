@@ -1,56 +1,83 @@
 const Model = require('../models/model');
 const express = require('express');
-const router = express.Router()
+const router = express.Router();
 
-module.exports = router;
+module.exports = router
 
 //Post Method
 router.post('/post', async (req, res) => {
-    const data = new Model({
-        uid: req.body.uid,
-        title: req.body.title,
-        description: req.body.description,
-        price: req.body.price, 
-        shipping: req.body.shipping,
-        currency: req.body.currency,
-        site: req.body.site,
-        url: req.body.url,
-        tags: req.body.tags
-    });
-    try {
-        const filter = {uid: data.uid}
-        const dataToSave = await Model.findOneAndUpdate(filter, data ,{
-            new: true,
-            upsert: true // Make this update into an upsert
-          });
-        res.status(200).json(dataToSave)
-    }
-    catch (error) {
-        res.status(400).json({message: error.message})
-    }
-});
+  const data = new Model({
+    uid: req.body.uid,
+    title: req.body.title,
+    description: req.body.description,
+    price: req.body.price,
+    shipping: req.body.shipping,
+    currency: req.body.currency,
+    site: req.body.site,
+    url: req.body.url,
+    tags: req.body.tags
+  });
+  try {
+    const filter = { uid: data.uid }
+    const dataToSave = await Model.findOneAndUpdate(filter, data, {
+      new: true,
+      upsert: true // Make this update into an upsert
+    })
+    res.status(200).json(dataToSave);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+})
 
 //Get all Method
 router.get('/getAll', async (req, res) => {
-    try{
-        const data = await Model.find();
-        res.json(data)
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }
-});
+  try {
+    const data = await Model.find()
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
 
 //Get by ID Method
 router.get('/getOne/:id', async (req, res) => {
-    try{
-        const data = await Model.findById(req.params.id);
-        res.json(data)
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }
-});
+  try {
+    const data = await Model.findById(req.params.id)
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
+router.get('/find/', async (req, res) => {
+  try {
+    var keywords = req.body.title.split(' ')
+
+    var searchKeywords = keywords.map(keyword => {
+      return { title: new RegExp(keyword, 'i') }
+    })
+
+    const result = await Model.find({ $and: searchKeywords }).sort('price')
+    const count = await Model.find({ $and: searchKeywords }).count()
+
+    const averagePrice =
+      result.reduce((partialSum, listing) => {
+        if (listing.price == null || listing.price == 0) {
+          return partialSum
+        }
+        return partialSum + listing.price
+      }, 0) / count;
+
+    //var averagePrice = await result.reduce((partialSum, listing) => partialSum + (listing.price ?? 0), 0) / count;
+    // var minPrice = result.reduce((partialSum, listing) => partialSum + listing.price ?? 0, 0) / count;
+    // var maxPrice = result.reduce((partialSum, listing) => partialSum + listing.price ?? 0, 0) / count;
+
+    res.json({ averagePrice, count, result });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+})
 
 // //Update by ID Method
 // router.patch('/update/:id', async (req, res) => {

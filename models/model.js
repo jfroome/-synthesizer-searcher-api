@@ -39,8 +39,7 @@ const listingSchema = new mongoose.Schema({
     type: Date
   },
   date_recorded: {
-    type: Date,
-    default: Date.now
+    type: Date
   },
   date_updated: {
     type: Date,
