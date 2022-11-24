@@ -6,7 +6,7 @@ module.exports = router
 
 //Post Method
 router.post('/post', async (req, res) => {
-  const data = new Model({
+  const data = {
     uid: req.body.uid,
     title: req.body.title,
     description: req.body.description,
@@ -15,12 +15,13 @@ router.post('/post', async (req, res) => {
     currency: req.body.currency,
     site: req.body.site,
     url: req.body.url,
-    tags: req.body.tags
-  });
+    tags: req.body.tags,
+    date_updated: new Date()
+  };
   try {
     const filter = { uid: data.uid }
+
     const dataToSave = await Model.findOneAndUpdate(filter, data, {
-      new: true,
       upsert: true // Make this update into an upsert
     })
     res.status(200).json(dataToSave);
@@ -32,7 +33,7 @@ router.post('/post', async (req, res) => {
 //Get all Method
 router.get('/getAll', async (req, res) => {
   try {
-    const data = await Model.find()
+    const data = await Model.find().sort({"date_recorded": -1})
     res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -54,7 +55,7 @@ router.get('/find/', async (req, res) => {
     var keywords = req.body.title.split(' ')
 
     var searchKeywords = keywords.map(keyword => {
-      return { title: new RegExp(keyword, 'i') }
+      return { title: new RegExp(keyword, 'i'), price: { $gt: 0} }
     })
 
     const result = await Model.find({ $and: searchKeywords }).sort('price')
