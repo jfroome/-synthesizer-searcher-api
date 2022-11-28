@@ -1,6 +1,6 @@
-const Model = require('../models/model');
-const express = require('express');
-const router = express.Router();
+const Model = require('../models/model')
+const express = require('express')
+const router = express.Router()
 
 module.exports = router
 
@@ -16,25 +16,38 @@ router.post('/post', async (req, res) => {
     site: req.body.site,
     url: req.body.url,
     tags: req.body.tags,
-    date_updated: new Date()
-  };
+    date_posted: req.body.posted,
+    date_updated: new Date(),
+    InStock: req.body.inStock
+  }
   try {
     const filter = { uid: data.uid }
 
     const dataToSave = await Model.findOneAndUpdate(filter, data, {
       upsert: true // Make this update into an upsert
     })
-    res.status(200).json(dataToSave);
+    res.status(200).json(dataToSave)
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message })
   }
 })
 
 //Get all Method
 router.get('/getAll', async (req, res) => {
   try {
-    const data = await Model.find().sort({"date_recorded": -1})
+    const data = await Model.find().sort({ price: 1 })
     res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
+router.get('/getLinks', async (req,res) => {
+  try {
+    const listings = (await Model.find().sort({ site: -1 }));
+    const links = [];
+    listings.map((listing) => {links.push(listing.url)});
+    res.json(links)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -55,7 +68,7 @@ router.get('/find/', async (req, res) => {
     var keywords = req.body.title.split(' ')
 
     var searchKeywords = keywords.map(keyword => {
-      return { title: new RegExp(keyword, 'i'), price: { $gt: 0} }
+      return { title: new RegExp(keyword, 'i'), price: { $gt: 0 } }
     })
 
     const result = await Model.find({ $and: searchKeywords }).sort('price')
@@ -67,16 +80,15 @@ router.get('/find/', async (req, res) => {
           return partialSum
         }
         return partialSum + listing.price
-      }, 0) / count;
+      }, 0) / count
 
     //var averagePrice = await result.reduce((partialSum, listing) => partialSum + (listing.price ?? 0), 0) / count;
     // var minPrice = result.reduce((partialSum, listing) => partialSum + listing.price ?? 0, 0) / count;
     // var maxPrice = result.reduce((partialSum, listing) => partialSum + listing.price ?? 0, 0) / count;
 
-    res.json({ averagePrice, count, result });
-
+    res.json({ averagePrice, count, result })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message })
   }
 })
 

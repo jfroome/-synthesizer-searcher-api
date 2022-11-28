@@ -36,14 +36,19 @@ const listingSchema = new mongoose.Schema({
     type: String
   },
   date_posted: {
+    type: Date,
+    default: Date.now
+  },
+  date_posted: {
     type: Date
   },
   date_recorded: {
-    type: Date
-  },
-  date_updated: {
     type: Date,
     default: Date.now
+  },
+  InStock:{
+    type: Boolean,
+    default: true
   },
   tags: { type: [String], index: true }
 })
