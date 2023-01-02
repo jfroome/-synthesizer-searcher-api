@@ -33,7 +33,7 @@ router.post('/post', async (req, res) => {
 })
 
 //Get all Method
-router.get('/getAll', async (req, res) => {
+router.get('/get', async (req, res) => {
   try {
     const data = await Model.find().sort({ price: 1 })
     res.json(data)
@@ -42,19 +42,28 @@ router.get('/getAll', async (req, res) => {
   }
 })
 
-router.get('/getLinks', async (req,res) => {
+router.get('/stock/get', async (req, res) => {
+  try {
+    const data = await Model.find( {InStock: true}).sort({ price: 1 })
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
+router.get('/links/get', async (req,res) => {
   try {
     const listings = (await Model.find().sort({ site: -1 }));
     const links = [];
     listings.map((listing) => {links.push(listing.url)});
-    res.json(links)
+    res.json({links: links})
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
 })
 
 //Get by ID Method
-router.get('/getOne/:id', async (req, res) => {
+router.get('/get/:id', async (req, res) => {
   try {
     const data = await Model.findById(req.params.id)
     res.json(data)
