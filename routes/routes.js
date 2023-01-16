@@ -33,14 +33,11 @@ router.post('/listing/post', async (req, res) => {
 })
 
 router.post('/listing/stock/post', async (req, res) => {
-  const data = {
-    url: req.body.url,
-    InStock: false
-  }
+  console.log(req.body.url);
   try {
-    const filter = { url: data.url }
-
-    const dataToSave = await Model.findOneAndUpdate(filter, data, { upsert: true })
+    const filter = { url: req.body.url }
+    const update = { InStock: false }
+    const dataToSave = await Model.findOneAndUpdate(filter,update,{ new: true })
     res.status(200).json(dataToSave)
   } catch (error) {
     res.status(400).json({ message: error.message })
@@ -59,7 +56,7 @@ router.get('/get', async (req, res) => {
 
 router.get('/listing/stock/get', async (req, res) => {
   try {
-    const data = await Model.find({ InStock: true }).sort({ price: 1 })
+    const data = await Model.find({ InStock: true, price: !null, InStock:true }).sort({ price: 1 })
     res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -68,9 +65,11 @@ router.get('/listing/stock/get', async (req, res) => {
 
 router.get('/links/get', async (req, res) => {
   try {
-    const listings = (await Model.find().sort({ site: -1 }));
-    const links = [];
-    listings.map((listing) => { links.push(listing.url) });
+    const listings = await Model.find({ InStock: true }).sort({ site: -1 })
+    const links = []
+    listings.map(listing => {
+      links.push(listing.url)
+    })
     res.json({ links: links })
   } catch (error) {
     res.status(500).json({ message: error.message })
